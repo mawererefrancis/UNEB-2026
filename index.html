@@ -40,7 +40,6 @@
       text-align: center;
       border: 1px solid rgba(255,255,255,0.5);
       backdrop-filter: blur(4px);
-      transition: all 0.2s;
     }
 
     #loginBox h2 {
@@ -48,7 +47,6 @@
       font-size: 1.9rem;
       margin-bottom: 1.5rem;
       color: #0b2d5c;
-      letter-spacing: -0.01em;
       border-bottom: 3px solid #2d68c4;
       display: inline-block;
       padding-bottom: 6px;
@@ -84,7 +82,6 @@
       margin-top: 16px;
       cursor: pointer;
       transition: all 0.15s;
-      letter-spacing: 0.3px;
     }
 
     #loginBox button:hover {
@@ -99,7 +96,7 @@
       color: #b91c1c;
     }
 
-    /* ---------- MAIN APPLICATION (initially hidden) ---------- */
+    /* ---------- MAIN APPLICATION ---------- */
     #app {
       display: none;
       width: 100%;
@@ -108,7 +105,7 @@
       padding: 20px 24px;
     }
 
-    /* ----- header & school identity – elegant alignment ----- */
+    /* ----- school header – elegant alignment ----- */
     .school-header {
       display: flex;
       flex-wrap: wrap;
@@ -136,7 +133,6 @@
       background: #e6f0ff;
       padding: 6px 18px;
       border-radius: 60px;
-      letter-spacing: 1px;
     }
 
     .uneb-subhead {
@@ -148,7 +144,7 @@
       width: 100%;
     }
 
-    /* ----- controls panel (clean, modern) ----- */
+    /* ----- controls panel ----- */
     .action-bar {
       background: white;
       padding: 16px 24px;
@@ -190,22 +186,23 @@
       transform: translateY(-2px);
     }
 
-    /* ----- report container – print-optimized later ----- */
-    .report-box {
+    /* ----- print‑page containers (force separate pages) ----- */
+    .print-page {
       background: white;
-      border-radius: 28px;
-      padding: 28px 22px;
+      padding: 20px 22px;
+      border-radius: 24px;
       box-shadow: 0 20px 30px -8px rgba(0,20,50,0.15);
-      margin-top: 8px;
-      transition: 0.2s;
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* ----- TABLES – compact, readable, professional ----- */
+    /* ----- TABLES – centered, improved font size ----- */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 11.5px;
-      margin: 18px 0;
+      font-size: 13px;          /* slightly larger for screen */
+      margin: 16px 0;
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 2px 6px rgba(0,0,0,0.04);
@@ -218,18 +215,16 @@
       padding: 10px 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      font-size: 10.5px;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 7px 4px;
-      border-bottom: 1px solid #e6edf4;
+      font-size: 12px;
+      text-align: center;
       vertical-align: middle;
     }
 
-    tr:last-child td {
-      border-bottom: none;
+    td {
+      padding: 8px 4px;
+      border-bottom: 1px solid #e6edf4;
+      text-align: center;
+      vertical-align: middle;
     }
 
     tfoot td {
@@ -239,10 +234,31 @@
       border-top: 2px solid #9ab3d8;
     }
 
-    /* highlight project & total rows */
-    .project-row, tr[style*="background: #e0f2fe"] {
+    .project-row {
       background: #e6f0ff !important;
       font-weight: 600;
+    }
+
+    /* ----- signature block (appears on every printed page) ----- */
+    .signature-block {
+      margin-top: 24px;
+      border-top: 2px dashed #9bb0cc;
+      padding-top: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 12px;
+      color: #1e3a5f;
+    }
+
+    .signature-line {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .signature-contact {
+      color: #2c4e6b;
     }
 
     /* ----- summary cards ----- */
@@ -250,110 +266,65 @@
       display: flex;
       gap: 24px;
       justify-content: flex-start;
-      margin: 16px 0 10px;
+      margin: 8px 0 0;
     }
 
     .card {
       background: linear-gradient(135deg, #eef4ff, #e6f0fc);
-      padding: 14px 28px;
+      padding: 12px 28px;
       border-radius: 50px;
       font-size: 1rem;
       font-weight: 600;
       color: #0a2c4e;
       border: 1px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
 
-    /* ----- SIGNATURE – bottom left, elegant ----- */
-    .signature {
-      margin-top: 36px;
-      font-size: 13px;
-      color: #1e3a5f;
-      border-top: 2px dashed #9bb0cc;
-      padding-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-
-    .signature-line {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .signature strong {
-      color: #0a2c4e;
-    }
-
-    .signature-contact {
-      color: #2c4e6b;
-    }
-
-    /* ============ SMALL SCREEN OPTIMIZATION ============ */
+    /* ----- mobile responsive ----- */
     @media (max-width: 700px) {
       #app { padding: 12px; }
-      .school-header { flex-direction: column; align-items: center; text-align: center; gap: 8px; }
-      .exam-year { align-self: center; }
+      .school-header { flex-direction: column; align-items: center; text-align: center; }
       .action-bar { flex-direction: column; }
       .action-bar button { width: 100%; justify-content: center; }
-      table { font-size: 10px; }
-      th, td { padding: 6px 2px; }
+      table { font-size: 11px; }
     }
 
-    /* ============ PRINT & PDF LANDSCAPE A4 — ONE PAGE, BOTTOM SIGNATURE ============ */
+    /* ============ PRINT / PDF – A4 LANDSCAPE, PAGE BREAKS, OWN SIGNATURE ============ */
     @media print {
       @page {
         size: A4 landscape;
         margin: 10mm 12mm 8mm 12mm;
       }
 
-      html, body {
-        height: 100%;
+      body, #app, .report-box {
         background: white;
         margin: 0;
         padding: 0;
       }
 
-      body * {
-        visibility: hidden;
-      }
-
-      #app, #app * {
-        visibility: visible;
-      }
-
-      #app {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-        padding: 0;
-        margin: 0;
-      }
-
-      .report-box {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        padding: 0 6px;
-        background: white;
+      .print-page {
+        page-break-after: always;    /* each page forces a break */
         box-shadow: none;
         border-radius: 0;
+        padding: 5px 10px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;           /* pushes signature to bottom */
       }
 
-      /* TABLES EXTRA COMPACT – fit all columns */
+      .print-page:last-child {
+        page-break-after: avoid;    /* no extra blank page */
+      }
+
       table {
-        font-size: 7.8pt !important;
-        margin: 6px 0;
+        font-size: 9pt !important;
+        margin: 8px 0;
         box-shadow: none;
       }
 
       th {
-        padding: 4px 2px !important;
-        font-size: 7.5pt !important;
+        padding: 5px 2px !important;
+        font-size: 8.5pt !important;
         background: #0a2c4e !important;
         color: white !important;
         -webkit-print-color-adjust: exact;
@@ -361,53 +332,34 @@
       }
 
       td {
-        padding: 4px 2px !important;
+        padding: 5px 2px !important;
       }
 
       .school-header {
-        padding: 10px 16px;
-        background: #f0f5fe;
-        border-left-width: 6px;
+        padding: 8px 12px;
         -webkit-print-color-adjust: exact;
       }
 
-      /* push signature to bottom of page */
-      .signature {
-        margin-top: auto;
-        border-top: 2px solid #3a5e7a;
-        padding-top: 12px;
+      .signature-block {
+        margin-top: auto;           /* stick to bottom */
+        border-top: 1.5px solid #3a5e7a;
         font-size: 9pt;
       }
 
-      .action-bar, .action-bar *,
-      #file, #schoolName, #year, button:not(.print-persist) {
+      .action-bar, #file, #schoolName, #year, button:not(.print-persist) {
         display: none !important;
-      }
-
-      /* keep cards subtle */
-      .summary-cards {
-        margin: 4px 0 0;
       }
 
       .card {
         background: #eaf0f9 !important;
-        padding: 6px 18px;
-        font-size: 9pt;
         -webkit-print-color-adjust: exact;
       }
     }
 
-    /* ---- pdf export helper (mirror print) ---- */
-    .pdf-export-mode table {
-      font-size: 7.8pt !important;
+    /* helper for PDF export */
+    .pdf-export-mode .print-page {
+      page-break-after: always;
     }
-    .pdf-export-mode .signature {
-      margin-top: auto;
-    }
-    .pdf-export-mode .action-bar {
-      display: none !important;
-    }
-
   </style>
 </head>
 <body>
@@ -425,47 +377,33 @@
 <!-- ============ MAIN APPLICATION ============ -->
 <div id="app">
 
-  <!-- dynamic school header (flex layout) -->
   <div id="schoolHeaderContainer" class="school-header">
     <!-- filled by JS -->
   </div>
 
-  <!-- controls panel -->
   <div class="action-bar">
-    <input id="schoolName" placeholder="e.g., ST. JOSEPH'S COLLEGE" value="MAWERERE MEMORIAL SCHOOL">
+    <input id="schoolName" placeholder="School name" value="MAWERERE MEMORIAL SCHOOL">
     <input id="year" placeholder="Year" value="2025">
     <input type="file" id="file" accept=".xlsx,.xls,.csv">
     <button onclick="generateReport()"><span>📂</span> GENERATE REPORT</button>
     <button onclick="printReport()"><span>🖨️</span> PRINT</button>
     <button onclick="downloadPDF()"><span>📄</span> EXPORT PDF</button>
     <button onclick="exportExcel()"><span>📊</span> EXCEL (2 TABLES)</button>
+    <button onclick="generateTestimonials()" style="background: #0f5c4b;"><span>📜</span> TESTIMONIALS (Excel)</button>
   </div>
 
-  <!-- REPORT AREA – all analytics tables & signature -->
-  <div id="reportArea" class="report-box">
-    <div id="subjectSummary"></div>
-    <div id="genderSummary"></div>
-    <div id="analytics"></div>
+  <!-- REPORT AREA – now contains separate .print-page containers -->
+  <div id="reportArea"></div>
 
-    <!-- SIGNATURE BLOCK – bottom left (print flex) -->
-    <div class="signature">
-      <div class="signature-line">
-        <span style="font-weight: 700;">Signature:</span> ___________________________________<br>
-        <span style="font-size: 12px; color: #2d4968;">Mawerere Francis · In charge Students Data</span>
-      </div>
-      <div class="signature-contact">
-        📞 0788222315 &nbsp; ✉️ mawererefrancis@gmail.com
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
-  // -------------------- GLOBAL DATA STORE (unchanged counting logic) --------------------
+  // -------------------- GLOBAL DATA STORE (COUNTING LOGIC UNCHANGED) --------------------
   let subjects = {};   // per subject: sat, A,B,C,D,E,X, PA,PB,PC,PD,PE,PX
   let gender = {};    // per subject: MA,MB,MC,MD,ME, FA,FB,FC,FD,FE
+  let lastLoadedRows = null;   // store rows for testimonial generation
 
-  // -------------------- LOGIN (centered, simple) --------------------
+  // -------------------- LOGIN --------------------
   function login() {
     const user = document.getElementById('username').value;
     const pwd = document.getElementById('password').value;
@@ -477,7 +415,7 @@
     }
   }
 
-  // -------------------- GENERATE REPORT – counting LOGIC untouched --------------------
+  // -------------------- GENERATE REPORT (counting logic exactly as original) --------------------
   function generateReport() {
     const file = document.getElementById('file').files[0];
     if (!file) { alert('Please select the UNEB Excel annex'); return; }
@@ -486,8 +424,9 @@
     reader.onload = function (e) {
       const wb = XLSX.read(e.target.result, { type: 'array' });
       const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      lastLoadedRows = rows;   // keep for testimonial export
 
-      // reset (pure logic, no changes)
+      // reset (pure original logic)
       subjects = {};
       gender = {};
 
@@ -507,11 +446,11 @@
           const g = validGrades.includes(gradeRaw) ? gradeRaw : 'X';
 
           if (!subjects[subject]) {
-            subjects[subject] = { sat: 0, A:0, B:0, C:0, D:0, E:0, X:0, PA:0, PB:0, PC:0, PD:0, PE:0, PX:0 };
+            subjects[subject] = { sat:0, A:0, B:0, C:0, D:0, E:0, X:0, PA:0, PB:0, PC:0, PD:0, PE:0, PX:0 };
           }
           subjects[subject].sat++;
           subjects[subject][g]++;
-          subjects[subject]['P' + pg]++;   // per-subject project counting (kept as original)
+          subjects[subject]['P' + pg]++;
 
           if (!gender[subject]) {
             gender[subject] = { MA:0, MB:0, MC:0, MD:0, ME:0, FA:0, FB:0, FC:0, FD:0, FE:0 };
@@ -521,7 +460,7 @@
         });
       });
 
-      // ----- build elegant school header (flex, aligned) -----
+      // build school header
       const schoolName = document.getElementById('schoolName').value || 'SCHOOL NAME';
       const year = document.getElementById('year').value || '';
       document.getElementById('schoolHeaderContainer').innerHTML = `
@@ -530,19 +469,40 @@
         <div class="uneb-subhead">UGANDA NATIONAL EXAMINATIONS BOARD · ANALYSIS</div>
       `;
 
-      renderSubjectTable();
-      renderGenderTable();
-      renderAnalyticsCards();
+      renderReportPages();  // creates two separate .print-page containers
     };
     reader.readAsArrayBuffer(file);
   }
 
-  // -------------------- SUBJECT TABLE (complete, project row + totals) --------------------
-  function renderSubjectTable() {
+  // -------------------- RENDER BOTH TABLES AS SEPARATE PAGES WITH SIGNATURE --------------------
+  function renderReportPages() {
+    let html = '';
+
+    // ---------- PAGE 1 : SUBJECT SUMMARY ----------
+    html += `<div class="print-page">`;
+    html += buildSubjectTableHTML();   // full table with title, project row, totals
+    html += buildSignatureBlock();     // signature for page 1
+    html += `</div>`;
+
+    // ---------- PAGE 2 : GENDER SUMMARY ----------
+    html += `<div class="print-page">`;
+    html += buildGenderTableHTML();
+    html += buildSignatureBlock();
+    html += `</div>`;
+
+    // optional: analytics cards only on first page? put inside subject page
+    // but we already have subject table; we can embed cards below the table.
+    // We'll adjust buildSubjectTableHTML to include analytics cards after the table.
+    document.getElementById('reportArea').innerHTML = html;
+  }
+
+  // -------------------- BUILD SUBJECT TABLE (with title and cards) --------------------
+  function buildSubjectTableHTML() {
     let totals = { A:0, B:0, C:0, D:0, E:0 };
 
-    let html = `<h3 style="color:#0a2c4e; border-left: 6px solid #2563eb; padding-left: 12px; margin-top: 8px;">📋 SUBJECT PERFORMANCE SUMMARY</h3>
-    <table>
+    let html = `<h3 style="color:#0a2c4e; border-left: 6px solid #2563eb; padding-left: 12px; margin-bottom: 6px;">📋 TABLE 1: SUBJECT PERFORMANCE SUMMARY</h3>`;
+
+    html += `<table>
       <thead>
         <tr>
           <th>Rank</th><th>Subject</th><th>Sat</th><th>A</th><th>%A</th><th>B</th><th>%B</th>
@@ -551,7 +511,6 @@
       </thead>
       <tbody>`;
 
-    // sort by %A descending (original ranking)
     let sorted = Object.keys(subjects).sort((a, b) => 
       (subjects[b].A / subjects[b].sat) - (subjects[a].A / subjects[a].sat)
     );
@@ -574,7 +533,7 @@
       </tr>`;
     });
 
-    // ----- PROJECT WORK row (aggregated as per original logic) -----
+    // project row
     let projTotals = { PA:0, PB:0, PC:0, PD:0, PE:0, PX:0 };
     Object.values(subjects).forEach(x => {
       projTotals.PA += x.PA; projTotals.PB += x.PB; projTotals.PC += x.PC;
@@ -588,23 +547,33 @@
       <td>${projTotals.PE}</td><td></td><td>${projTotals.PX}</td>
     </tr>`;
 
-    // ----- TOTAL row (A-E sum) -----
     html += `<tfoot><tr>
       <td></td><td><strong>TOTAL (A–E)</strong></td><td></td>
       <td>${totals.A}</td><td></td><td>${totals.B}</td><td></td>
-      <td>${totals.C}</td><td></td><td>${totals.D}</td><td></td>
+      <td>${totals.C}</td><td></td><td>totals.D}</td><td></td>
       <td>${totals.E}</td><td></td><td></td>
     </tr></tfoot></table>`;
 
-    document.getElementById('subjectSummary').innerHTML = html;
+    // analytics cards (added inside page 1)
+    let totalA = 0, totalSat = 0;
+    Object.values(subjects).forEach(x => { totalA += x.A; totalSat += x.sat; });
+    let mean = totalSat ? (totalA / totalSat * 100) : 0;
+    let comment = mean >= 40 ? '🏆 Excellent Performance' : (mean >= 25 ? '📈 Good Performance' : '📉 Needs Improvement');
+
+    html += `<div class="summary-cards">
+      <div class="card">🎓 School %A : ${mean.toFixed(1)}%</div>
+      <div class="card">${comment}</div>
+    </div>`;
+
+    return html;
   }
 
-  // -------------------- GENDER TABLE (full, totals) --------------------
-  function renderGenderTable() {
+  // -------------------- BUILD GENDER TABLE (title only) --------------------
+  function buildGenderTableHTML() {
     let grand = { MA:0, MB:0, MC:0, MD:0, ME:0, FA:0, FB:0, FC:0, FD:0, FE:0 };
 
-    let html = `<h3 style="color:#0a2c4e; border-left: 6px solid #2563eb; padding-left: 12px; margin-top: 28px;">⚥ GENDER DISTRIBUTION BY SUBJECT</h3>
-    <table>
+    let html = `<h3 style="color:#0a2c4e; border-left: 6px solid #2563eb; padding-left: 12px; margin-bottom: 6px;">⚥ TABLE 2: GENDER DISTRIBUTION BY SUBJECT</h3>`;
+    html += `<table>
       <thead>
         <tr>
           <th>Subject</th><th>MA</th><th>MB</th><th>MC</th><th>MD</th><th>ME</th>
@@ -629,78 +598,140 @@
       <td>${grand.FA}</td><td>${grand.FB}</td><td>${grand.FC}</td><td>${grand.FD}</td><td>${grand.FE}</td>
     </tr></tfoot></table>`;
 
-    document.getElementById('genderSummary').innerHTML = html;
+    return html;
   }
 
-  // -------------------- ANALYTICS CARDS (unchanged %A) --------------------
-  function renderAnalyticsCards() {
-    let totalA = 0, totalSat = 0;
-    Object.values(subjects).forEach(x => { totalA += x.A; totalSat += x.sat; });
-    let mean = totalSat ? (totalA / totalSat * 100) : 0;
-    let comment = mean >= 40 ? '🏆 Excellent Performance' : (mean >= 25 ? '📈 Good Performance' : '📉 Needs Improvement');
-
-    document.getElementById('analytics').innerHTML = `
-      <div class="summary-cards">
-        <div class="card">🎓 School %A : ${mean.toFixed(1)}%</div>
-        <div class="card">${comment}</div>
+  // -------------------- SIGNATURE BLOCK (reusable) --------------------
+  function buildSignatureBlock() {
+    return `<div class="signature-block">
+      <div class="signature-line">
+        <span style="font-weight: 700;">Signature:</span> ___________________________________<br>
+        <span style="font-size: 12px; color: #2d4968;">Mawerere Francis · In charge Students Data</span>
       </div>
-    `;
+      <div class="signature-contact">
+        📞 0788222315 &nbsp; ✉️ mawererefrancis@gmail.com
+      </div>
+    </div>`;
   }
 
-  // -------------------- PRINT (fits one page thanks to print styles) --------------------
+  // -------------------- PRINT --------------------
   function printReport() { window.print(); }
 
-  // -------------------- PDF EXPORT (enforce print-like compact + bottom signature) --------------------
+  // -------------------- PDF --------------------
   function downloadPDF() {
-    const reportArea = document.getElementById('reportArea');
-    // temporarily add class to mimic print compact
-    reportArea.classList.add('pdf-export-mode');
-    
+    const element = document.getElementById('reportArea');
+    element.classList.add('pdf-export-mode');
     html2pdf().set({
-      margin: [8, 10, 5, 10], // top, right, bottom, left (mm)
+      margin: [8, 10, 5, 10],
       filename: 'UNEB_ANALYSIS_MAWERERE.pdf',
       image: { type: 'jpeg', quality: 0.95 },
       html2canvas: { scale: 0.58, letterRendering: true, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    }).from(reportArea).save().then(() => {
-      reportArea.classList.remove('pdf-export-mode');
+    }).from(element).save().then(() => {
+      element.classList.remove('pdf-export-mode');
     });
   }
 
-  // -------------------- EXCEL with TWO FULL TABLES (subject + gender) --------------------
+  // -------------------- EXCEL (two tables) --------------------
   function exportExcel() {
     const wb = XLSX.utils.book_new();
-
-    // ----- Subject summary table (full, incl project & total) -----
-    const subjectTable = document.querySelector('#subjectSummary table');
+    const subjectTable = document.querySelector('#reportArea .print-page:first-child table');
     if (subjectTable) {
       const wsSub = XLSX.utils.table_to_sheet(subjectTable);
-      // add title line? we can insert school name
       XLSX.utils.sheet_add_aoa(wsSub, [['SUBJECT ACHIEVEMENT SUMMARY']], { origin: 'A1' });
       XLSX.utils.book_append_sheet(wb, wsSub, 'Subject Summary');
     }
-
-    // ----- Gender distribution table -----
-    const genderTable = document.querySelector('#genderSummary table');
+    const genderTable = document.querySelector('#reportArea .print-page:last-child table');
     if (genderTable) {
       const wsGen = XLSX.utils.table_to_sheet(genderTable);
       XLSX.utils.sheet_add_aoa(wsGen, [['GENDER DISTRIBUTION']], { origin: 'A1' });
       XLSX.utils.book_append_sheet(wb, wsGen, 'Gender Summary');
     }
-
-    // optional – add third sheet with school context
     const school = document.getElementById('schoolName').value || 'SCHOOL';
     const year = document.getElementById('year').value || '';
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[school + ' UNEB REPORT ' + year]]), 'Cover');
-    
     XLSX.writeFile(wb, `UNEB_${school.replace(/\s/g,'_')}_${year || 'report'}.xlsx`);
   }
 
-  // -------------------- (optional) file upload hint --------------------
-  window.onload = function() {
-    // demo: pre-set login fields
-  };
-</script>
+  // -------------------- INDIVIDUAL LEARNER TESTIMONIALS (EXCEL) --------------------
+  function generateTestimonials() {
+    if (!lastLoadedRows || lastLoadedRows.length === 0) {
+      alert('Please generate the report first (upload Excel and click GENERATE REPORT)');
+      return;
+    }
 
+    const wb = XLSX.utils.book_new();
+    const schoolName = document.getElementById('schoolName').value || 'SCHOOL NAME';
+    const year = document.getElementById('year').value || 'YEAR';
+
+    lastLoadedRows.forEach((row, idx) => {
+      // extract candidate details
+      const indexNo = row.IndexNo || `CANDIDATE_${idx+1}`;
+      const name = row.Candidate_Name || '';
+      const sex = row.Sex || '';
+      const result = row.Result || '';
+      const project = row['PROJECT WORK'] || 'X';
+      const achievements = String(row['SUBJECT ACHIEVEMENTS'] || '').trim();
+
+      // build subject-grade pairs
+      const subjectList = [];
+      if (achievements) {
+        achievements.split(' ').forEach(item => {
+          if (item.includes('-')) {
+            let [sub, grad] = item.split('-');
+            subjectList.push([sub.trim(), grad.trim()]);
+          }
+        });
+      }
+
+      // ----- construct worksheet data (array of arrays) -----
+      let wsData = [];
+
+      // header
+      wsData.push(['INDIVIDUAL LEARNER TESTIMONIAL']);
+      wsData.push([`School: ${schoolName}`, `Year: ${year}`]);
+      wsData.push([]);
+
+      // candidate details
+      wsData.push(['Candidate Index:', indexNo]);
+      wsData.push(['Full Name:', name]);
+      wsData.push(['Sex:', sex]);
+      wsData.push(['Overall Result:', result]);
+      wsData.push([]);
+
+      // subject table header
+      wsData.push(['SUBJECT', 'GRADE']);
+      subjectList.forEach(([sub, grade]) => {
+        wsData.push([sub, grade]);
+      });
+      wsData.push([]);
+      wsData.push(['Project Work Grade:', project]);
+      wsData.push([]);
+      wsData.push([]);
+
+      // HEAD TEACHER COMMENT & SIGNATURE BLOCK
+      wsData.push(['HEAD TEACHER\'S COMMENT:  ___________________________________________']);
+      wsData.push([]);
+      wsData.push(['Head Teacher\'s Name:      ______________________________']);
+      wsData.push(['Title:                   ______________________________']);
+      wsData.push(['Rank:                   ______________________________']);
+      wsData.push(['Signature:              ______________________________']);
+      wsData.push([]);
+      wsData.push(['Date:                   ______________________________']);
+
+      // create worksheet
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      // column widths (optional, makes it nicer)
+      ws['!cols'] = [{ wch: 22 }, { wch: 32 }];
+      
+      // sheet name = indexNo (trim to 31 chars)
+      let sheetName = String(indexNo).replace(/[\\*?:[\]/]/g, '_').slice(0, 31);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+
+    // add a cover sheet with summary? optional
+    XLSX.writeFile(wb, `LEARNER_TESTIMONIALS_${schoolName.replace(/\s/g,'_')}_${year}.xlsx`);
+  }
+
+</script>
 </body>
 </html>

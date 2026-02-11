@@ -286,7 +286,7 @@
       flex-direction: column;
       border: none;
     }
-    /* header with logos */
+    /* header with logos – improved image rendering */
     .testimonial-header {
       display: flex;
       align-items: center;
@@ -294,16 +294,29 @@
       margin-bottom: 8px;
     }
     .logo-box {
-      width: 85px;
-      height: 85px;
+      width: 90px;
+      height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #fafbfd;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 4px;
+      image-rendering: auto;          /* high-quality scaling */
+      image-rendering: crisp-edges;   /* fallback */
     }
     .logo-box img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
+    }
+    .logo-placeholder {
+      font-size: 12px;
+      color: #6c7a89;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .school-info {
       text-align: center;
@@ -694,14 +707,14 @@
     XLSX.writeFile(wb, `UNEB_${school.replace(/\s/g,'_')}_${year||'report'}.xlsx`);
   }
 
-  // -------------------- INDIVIDUAL TESTIMONIAL – PDF + ZIP (PERFECT LAYOUT) --------------------
+  // -------------------- INDIVIDUAL TESTIMONIAL – PDF + ZIP (CRISP IMAGES & LAYOUT) --------------------
   async function generateTestimonialPDFs() {
     if (!lastLoadedRows || lastLoadedRows.length === 0) {
       alert('Please generate the report first (upload Excel and click GENERATE REPORT)');
       return;
     }
 
-    // read logo files as dataURLs
+    // read logo files as dataURLs (high resolution)
     const logoLeftFile = document.getElementById('logoLeft').files[0];
     const logoRightFile = document.getElementById('logoRight').files[0];
     let logoLeftData = null, logoRightData = null;
@@ -746,12 +759,16 @@
         });
       }
 
-      // ----- BUILD PERFECT TESTIMONIAL HTML -----
+      // ----- BUILD HIGH-QUALITY TESTIMONIAL HTML WITH LOGO PLACEHOLDERS -----
       const testimonialHTML = `
         <div class="testimonial-page">
           <!-- Header with logos and school info -->
           <div class="testimonial-header">
-            <div class="logo-box">${logoLeftData ? `<img src="${logoLeftData}" alt="School Logo">` : ''}</div>
+            <div class="logo-box">
+              ${logoLeftData 
+                ? `<img src="${logoLeftData}" alt="School Logo" crossorigin="anonymous">` 
+                : `<span class="logo-placeholder">SCHOOL<br>LOGO</span>`}
+            </div>
             <div class="school-info">
               <div class="school-name-large">${settings.schoolName}</div>
               <div class="school-address">${settings.address}  TEL: ${settings.tel1} / ${settings.tel2}</div>
@@ -760,7 +777,11 @@
               <div class="school-mission">MISSION: <em>${settings.mission}</em></div>
               <div class="school-motto">MOTTO: <em>${settings.motto}</em></div>
             </div>
-            <div class="logo-box">${logoRightData ? `<img src="${logoRightData}" alt="School Logo">` : ''}</div>
+            <div class="logo-box">
+              ${logoRightData 
+                ? `<img src="${logoRightData}" alt="School Logo" crossorigin="anonymous">` 
+                : `<span class="logo-placeholder">SCHOOL<br>LOGO</span>`}
+            </div>
           </div>
 
           <!-- Date (right aligned) -->
@@ -822,13 +843,26 @@
       container.innerHTML = testimonialHTML;
       document.body.appendChild(container);
 
+      // *** ENSURE IMAGES ARE FULLY LOADED BEFORE RENDERING PDF ***
+      const images = container.querySelectorAll('img');
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+      }));
+
       try {
-        // pdf generation with optimal settings for A4 portrait
+        // HIGH-QUALITY PDF GENERATION – scale 2.5 for crisp images
         const pdfBlob = await html2pdf().set({
-          margin: [5, 5, 5, 5],        // small margins (mm)
+          margin: [5, 5, 5, 5],
           filename: `${candidateName}.pdf`,
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { scale: 1.2, letterRendering: true, useCORS: true, logging: false },
+          image: { type: 'jpeg', quality: 0.98 },   // higher quality
+          html2canvas: { 
+            scale: 2.5,                           // ultra high resolution for sharp images
+            letterRendering: true, 
+            useCORS: true, 
+            logging: false,
+            allowTaint: false
+          },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(container).output('blob');
 

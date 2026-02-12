@@ -271,7 +271,7 @@
       }
     }
 
-    /* ----- analytics tables ----- */
+    /* ----- ANALYTICS TABLES – FULLY RESTORED ----- */
     .print-page {
       background: white;
       padding: 20px 22px;
@@ -341,11 +341,11 @@
       border: 1px solid white;
     }
 
-    /* ========== TESTIMONIAL PAGE – PERFECT ONE PAGE, PRINT OPTIMIZED ========== */
+    /* ========== TESTIMONIAL PAGE – ONE PAGE, PRINT OPTIMIZED ========== */
     .testimonial-page {
       width: 210mm;
       min-height: 297mm;
-      padding: 5mm 5mm 5mm;        /* ultra compact, safe */
+      padding: 5mm 5mm 5mm;
       background: white;
       font-family: 'Times New Roman', Times, serif;
       margin: 0 auto;
@@ -497,7 +497,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      margin-top: 8px;        /* fixed, not auto */
+      margin-top: 8px;
       width: 100%;
     }
     .signature-inner {
@@ -606,7 +606,7 @@
       <input type="text" id="htRank" value="HEAD TEACHER">
     </div>
 
-    <!-- BULK GENERATION BUTTONS (still available) -->
+    <!-- BULK GENERATION BUTTONS -->
     <div style="flex:1 1 100%; display:flex; flex-direction:column; gap:20px;">
       <div style="display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; gap:16px; justify-content:flex-end; flex-wrap:wrap;">
@@ -640,21 +640,21 @@
     </div>
   </div>
 
-  <!-- HIDDEN PRINT CONTAINER (filled when print button clicked) -->
+  <!-- HIDDEN PRINT CONTAINER -->
   <div id="printContainer" class="print-testimonial"></div>
 
-  <!-- REPORT AREA – analytics tables -->
+  <!-- REPORT AREA – ANALYTICS TABLES (FULLY RESTORED) -->
   <div id="reportArea"></div>
 </div>
 
 <script>
-  // -------------------- GLOBAL DATA (COUNTING LOGIC – ACCURATE PROJECT) --------------------
+  // ==================== GLOBAL DATA ====================
   let subjects = {};   
   let gender = {};    
   let projectTotals = { PA:0, PB:0, PC:0, PD:0, PE:0, PX:0 };
   let lastLoadedRows = null;
 
-  // -------------------- LOGIN / LOGOUT --------------------
+  // ==================== LOGIN / LOGOUT ====================
   function login() {
     if (username.value === "admin" && password.value === "1234") {
       loginBox.style.display = "none";
@@ -670,12 +670,11 @@
     password.value = "1234";
     loginError.innerText = "";
   }
-
   function toggleSettings() {
     document.getElementById('testimonialSettings').classList.toggle('show');
   }
 
-  // -------------------- GENERATE REPORT – ACCURATE PROJECT COUNTS --------------------
+  // ==================== GENERATE REPORT – ACCURATE PROJECT COUNTS ====================
   function generateReport() {
     const file = document.getElementById('file').files[0];
     if (!file) { alert('Please select the UNEB Excel annex'); return; }
@@ -686,6 +685,7 @@
       const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
       lastLoadedRows = rows;
 
+      // Reset data structures
       subjects = {};
       gender = {};
       projectTotals = { PA:0, PB:0, PC:0, PD:0, PE:0, PX:0 };
@@ -699,9 +699,10 @@
         const validGrades = ['A','B','C','D','E','X'];
         const pg = validGrades.includes(project) ? project : 'X';
         
-        // per-candidate project count (accurate)
+        // PER-CANDIDATE PROJECT COUNT (ACCURATE)
         projectTotals['P' + pg]++;
 
+        // SUBJECT & GENDER COUNTS (ORIGINAL LOGIC)
         achievements.split(' ').forEach(item => {
           if (!item.includes('-')) return;
           const [subjectRaw, gradeRaw] = item.split('-');
@@ -722,6 +723,7 @@
         });
       });
 
+      // Update school header
       const schoolName = document.getElementById('schoolName').value || 'SCHOOL NAME';
       const year = document.getElementById('year').value || '';
       document.getElementById('schoolHeaderContainer').innerHTML = `
@@ -730,14 +732,171 @@
         <div class="uneb-subhead">UGANDA NATIONAL EXAMINATIONS BOARD · ANALYSIS</div>
       `;
 
+      // RENDER ANALYTICS TABLES
       renderReportPages();
-      renderCandidateList(); // populate quick-print table
+
+      // POPULATE CANDIDATE LIST
+      renderCandidateList();
       document.getElementById('candidateListSection').style.display = 'block';
     };
     reader.readAsArrayBuffer(file);
   }
 
-  // -------------------- POPULATE CANDIDATE TABLE --------------------
+  // ==================== BUILD SUBJECT TABLE (FULLY RESTORED) ====================
+  function buildSubjectTableHTML() {
+    let totals = { A:0, B:0, C:0, D:0, E:0 };
+    let html = `<h3 style="color:#0a2c4e; border-left:6px solid #2563eb; padding-left:12px; margin-bottom:6px;">📋 TABLE 1: SUBJECT PERFORMANCE SUMMARY</h3>`;
+    html += `<table>
+      <thead>
+        <tr>
+          <th>Rank</th><th>Subject</th><th>Sat</th><th>A</th><th>%A</th><th>B</th><th>%B</th>
+          <th>C</th><th>%C</th><th>D</th><th>%D</th><th>E</th><th>%E</th><th>X</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    let sorted = Object.keys(subjects).sort((a,b) => 
+      (subjects[b].A / subjects[b].sat) - (subjects[a].A / subjects[a].sat)
+    );
+
+    sorted.forEach((s, i) => {
+      let x = subjects[s];
+      totals.A += x.A; totals.B += x.B; totals.C += x.C; totals.D += x.D; totals.E += x.E;
+      let p = (grade) => x.sat ? ((x[grade] / x.sat) * 100).toFixed(1) : '0.0';
+
+      html += `<tr>
+        <td><strong>${i+1}</strong></td>
+        <td style="font-weight:600;">${s}</td>
+        <td>${x.sat}</td>
+        <td>${x.A}</td><td>${p('A')}%</td>
+        <td>${x.B}</td><td>${p('B')}%</td>
+        <td>${x.C}</td><td>${p('C')}%</td>
+        <td>${x.D}</td><td>${p('D')}%</td>
+        <td>${x.E}</td><td>${p('E')}%</td>
+        <td>${x.X}</td>
+      </tr>`;
+    });
+
+    // PROJECT WORK ROW – using global projectTotals (accurate)
+    html += `<tr class="project-row" style="background: #e3effa; font-weight: 600;">
+      <td></td><td>📌 PROJECT WORK</td><td></td>
+      <td>${projectTotals.PA}</td><td></td><td>${projectTotals.PB}</td><td></td>
+      <td>${projectTotals.PC}</td><td></td><td>${projectTotals.PD}</td><td></td>
+      <td>${projectTotals.PE}</td><td></td><td>${projectTotals.PX}</td>
+    </tr>`;
+
+    // TOTAL ROW
+    html += `<tfoot>
+      <tr>
+        <td></td><td><strong>TOTAL (A–E)</strong></td><td></td>
+        <td>${totals.A}</td><td></td><td>${totals.B}</td><td></td>
+        <td>${totals.C}</td><td></td><td>${totals.D}</td><td></td>
+        <td>${totals.E}</td><td></td><td></td>
+      </tr>
+    </tfoot></table>`;
+
+    // ANALYTICS CARDS
+    let totalA = 0, totalSat = 0;
+    Object.values(subjects).forEach(x => { totalA += x.A; totalSat += x.sat; });
+    let mean = totalSat ? (totalA / totalSat * 100) : 0;
+    let comment = mean >= 40 ? '🏆 Excellent Performance' : (mean >= 25 ? '📈 Good Performance' : '📉 Needs Improvement');
+
+    html += `<div class="summary-cards">
+      <div class="card">🎓 School %A : ${mean.toFixed(1)}%</div>
+      <div class="card">${comment}</div>
+    </div>`;
+
+    return html;
+  }
+
+  // ==================== BUILD GENDER TABLE (FULLY RESTORED) ====================
+  function buildGenderTableHTML() {
+    let grand = { MA:0, MB:0, MC:0, MD:0, ME:0, FA:0, FB:0, FC:0, FD:0, FE:0 };
+
+    let html = `<h3 style="color:#0a2c4e; border-left:6px solid #2563eb; padding-left:12px; margin-bottom:6px;">⚥ TABLE 2: GENDER DISTRIBUTION BY SUBJECT</h3>`;
+    html += `<table>
+      <thead>
+        <tr>
+          <th>Subject</th><th>MA</th><th>MB</th><th>MC</th><th>MD</th><th>ME</th>
+          <th>FA</th><th>FB</th><th>FC</th><th>FD</th><th>FE</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    Object.keys(gender).sort().forEach(s => {
+      let g = gender[s];
+      Object.keys(grand).forEach(k => grand[k] += g[k] || 0);
+      html += `<tr>
+        <td style="font-weight:600;">${s}</td>
+        <td>${g.MA || 0}</td><td>${g.MB || 0}</td><td>${g.MC || 0}</td><td>${g.MD || 0}</td><td>${g.ME || 0}</td>
+        <td>${g.FA || 0}</td><td>${g.FB || 0}</td><td>${g.FC || 0}</td><td>${g.FD || 0}</td><td>${g.FE || 0}</td>
+      </tr>`;
+    });
+
+    html += `<tfoot>
+      <tr>
+        <td><strong>TOTAL</strong></td>
+        <td>${grand.MA}</td><td>${grand.MB}</td><td>${grand.MC}</td><td>${grand.MD}</td><td>${grand.ME}</td>
+        <td>${grand.FA}</td><td>${grand.FB}</td><td>${grand.FC}</td><td>${grand.FD}</td><td>${grand.FE}</td>
+      </tr>
+    </tfoot></table>`;
+
+    return html;
+  }
+
+  // ==================== SIGNATURE BLOCK (for analytics pages) ====================
+  function buildSignatureBlock() {
+    return `<div class="signature-block">
+      <div class="signature-line">
+        <span style="font-weight:700;">Signature:</span> ___________________________________<br>
+        <span style="font-size:12px; color:#2d4968;">Mawerere Francis · In charge Students Data</span>
+      </div>
+      <div class="signature-contact">
+        📞 0788222315 &nbsp; ✉️ mawererefrancis@gmail.com
+      </div>
+    </div>`;
+  }
+
+  // ==================== RENDER TWO PAGES (ANALYTICS) ====================
+  function renderReportPages() {
+    let html = `<div class="print-page">${buildSubjectTableHTML()}${buildSignatureBlock()}</div>`;
+    html += `<div class="print-page">${buildGenderTableHTML()}${buildSignatureBlock()}</div>`;
+    document.getElementById('reportArea').innerHTML = html;
+  }
+
+  // ==================== PRINT / PDF / EXCEL (unchanged) ====================
+  function printReport() { window.print(); }
+  function downloadPDF() {
+    const element = document.getElementById('reportArea');
+    element.classList.add('pdf-export-mode');
+    html2pdf().set({ 
+      margin:[8,10,5,10], 
+      filename:'UNEB_ANALYSIS_MAWERERE.pdf', 
+      image:{type:'jpeg',quality:0.95}, 
+      html2canvas:{scale:0.58,letterRendering:true,useCORS:true}, 
+      jsPDF:{unit:'mm',format:'a4',orientation:'landscape'} 
+    }).from(element).save().then(() => element.classList.remove('pdf-export-mode'));
+  }
+  function exportExcel() {
+    const wb = XLSX.utils.book_new();
+    const subjectTable = document.querySelector('#reportArea .print-page:first-child table');
+    if (subjectTable) { 
+      const ws = XLSX.utils.table_to_sheet(subjectTable); 
+      XLSX.utils.sheet_add_aoa(ws, [['SUBJECT ACHIEVEMENT SUMMARY']], { origin:'A1' }); 
+      XLSX.utils.book_append_sheet(wb, ws, 'Subject Summary'); 
+    }
+    const genderTable = document.querySelector('#reportArea .print-page:last-child table');
+    if (genderTable) { 
+      const ws = XLSX.utils.table_to_sheet(genderTable); 
+      XLSX.utils.sheet_add_aoa(ws, [['GENDER DISTRIBUTION']], { origin:'A1' }); 
+      XLSX.utils.book_append_sheet(wb, ws, 'Gender Summary'); 
+    }
+    const school = document.getElementById('schoolName').value || 'SCHOOL'; 
+    const year = document.getElementById('year').value || '';
+    XLSX.writeFile(wb, `UNEB_${school.replace(/\s/g,'_')}_${year||'report'}.xlsx`);
+  }
+
+  // ==================== CANDIDATE LIST (QUICK PRINT) ====================
   function renderCandidateList() {
     if (!lastLoadedRows) return;
     const tbody = document.getElementById('candidateTableBody');
@@ -753,12 +912,11 @@
     });
   }
 
-  // helper to escape single quotes
   function escapeString(str) {
     return str.replace(/'/g, "\\'");
   }
 
-  // -------------------- PRINT SINGLE TESTIMONIAL (DIRECT FROM BROWSER) --------------------
+  // ==================== PRINT SINGLE TESTIMONIAL ====================
   async function printSingleTestimonial(indexNo, candidateName, resultOverall, projectGrade, achievements) {
     const settings = {
       schoolName: document.getElementById('testSchoolName').value || 'RUBONGI ARMY SECONDARY SCHOOL',
@@ -842,7 +1000,6 @@
     const printContainer = document.getElementById('printContainer');
     printContainer.innerHTML = testimonialHTML;
 
-    // Ensure images are loaded before printing
     const images = printContainer.querySelectorAll('img');
     await Promise.all(Array.from(images).map(img => {
       if (img.complete) return Promise.resolve();
@@ -855,16 +1012,18 @@
     window.print();
   }
 
-  // -------------------- BULK PDF GENERATION (optimized, compact) --------------------
+  // ==================== BULK PDF GENERATION (optimized) ====================
   async function generateTestimonialPDFs() {
     if (!lastLoadedRows || lastLoadedRows.length === 0) {
       alert('Please generate the report first');
       return;
     }
+
     const pdfBtn = document.getElementById('generatePdfBtn');
     const wordBtn = document.getElementById('generateWordBtn');
     pdfBtn.disabled = true; wordBtn.disabled = true;
     pdfBtn.innerHTML = '<span class="spinner"></span> GENERATING PDFs...';
+
     const progressContainer = document.getElementById('pdfProgressContainer');
     const progressBar = document.getElementById('pdfProgressBar');
     progressContainer.style.display = 'block';
@@ -876,7 +1035,7 @@
     if (logoLeftFile) logoLeftData = await readFileAsDataURL(logoLeftFile);
     if (logoRightFile) logoRightData = await readFileAsDataURL(logoRightFile);
 
-    const settings = { /* same as before */ 
+    const settings = {
       schoolName: document.getElementById('testSchoolName').value || 'RUBONGI ARMY SECONDARY SCHOOL',
       address: document.getElementById('schoolAddress').value || 'P.O.BOX 698 TORORO',
       tel1: document.getElementById('tel1').value || '0782651148',
@@ -889,6 +1048,7 @@
       htTitle: document.getElementById('htTitle').value || 'Maj.',
       htRank: document.getElementById('htRank').value || 'HEAD TEACHER'
     };
+
     const currentDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' });
 
     const zip = new JSZip();
@@ -916,60 +1076,139 @@
           });
         }
 
-        const testimonialHTML = `...`; // (same compact layout as above, omitted for brevity – use same as in printSingleTestimonial)
-        // (full code in final answer will include the complete HTML string)
+        const testimonialHTML = `
+          <div class="testimonial-page">
+            <div class="testimonial-header">
+              <div class="logo-box">${logoLeftData ? `<img src="${logoLeftData}" alt="Logo">` : '<span class="logo-placeholder">SCHOOL<br>LOGO</span>'}</div>
+              <div class="school-info">
+                <div class="school-name-large">${settings.schoolName}</div>
+                <div class="school-address">${settings.address}  TEL: ${settings.tel1} / ${settings.tel2}</div>
+                <div class="school-address">${settings.website}</div>
+                <div class="school-vision">VISION: <em>${settings.vision}</em></div>
+                <div class="school-mission">MISSION: <em>${settings.mission}</em></div>
+                <div class="school-motto">MOTTO: <em>${settings.motto}</em></div>
+              </div>
+              <div class="logo-box">${logoRightData ? `<img src="${logoRightData}" alt="Logo">` : '<span class="logo-placeholder">SCHOOL<br>LOGO</span>'}</div>
+            </div>
+            <div class="testimonial-date"><strong>DATE:</strong> ${currentDate}</div>
+            <div class="testimonial-title">NLSC TESTIMONIAL 2026</div>
+            <div class="candidate-details">
+              <span><strong>NAME:</strong> ${candidateName}</span>
+              <span><strong>INDEX NO:</strong> ${indexNo}</span>
+            </div>
+            <div class="lin-row">
+              <span class="lin-label"><strong>LIN:</strong></span>
+              <span class="lin-dots"></span>
+            </div>
+            <table class="subject-table">
+              <thead><tr><th>S/NO</th><th>SUBJECT</th><th>SUBJECT ACHIEVEMENT</th></tr></thead>
+              <tbody>
+                ${subjectsList.length > 0 
+                  ? subjectsList.map(([sub, grade], idx) => `<tr><td>${idx+1}</td><td>${sub}</td><td style="font-weight:bold; text-align:center;">${grade}</td></tr>`).join('')
+                  : `<tr><td colspan="3" style="text-align:center; font-style:italic;">No subjects recorded</td></tr>`}
+              </tbody>
+            </table>
+            <div class="result-row">
+              <span><strong>RESULT:</strong> ${resultOverall}</span>
+              <span><strong>PROJECT WORK:</strong> ${projectGrade}</span>
+            </div>
+            <div class="signature-wrapper">
+              <div class="signature-inner">
+                <div class="signature-line-sign"></div>
+                <div class="signature-name">${settings.htName}</div>
+                <div class="signature-title">${settings.htTitle}</div>
+                <div class="signature-rank">${settings.htRank}</div>
+              </div>
+            </div>
+          </div>
+        `;
 
-        // For brevity in this response, I'll include the full string in the final code.
-        // (In the final answer I will insert the complete testimonialHTML here)
-        
         const container = document.createElement('div');
         container.innerHTML = testimonialHTML;
         document.body.appendChild(container);
+
         const images = container.querySelectorAll('img');
         await Promise.all(Array.from(images).map(img => {
           if (img.complete) return Promise.resolve();
-          return Promise.race([new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }), new Promise(resolve => setTimeout(resolve, 2000))]);
+          return Promise.race([
+            new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }),
+            new Promise(resolve => setTimeout(resolve, 2000))
+          ]);
         }));
+
         try {
-          const pdfBlob = await html2pdf().set({ margin:[8,8,8,8], filename:`${candidateName}.pdf`, image:{type:'jpeg',quality:0.95}, html2canvas:{scale:1.8,letterRendering:true,useCORS:true,logging:false}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} }).from(container).output('blob');
+          const pdfBlob = await html2pdf().set({
+            margin: [8,8,8,8],
+            filename: `${candidateName}.pdf`,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 1.8, letterRendering: true, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          }).from(container).output('blob');
+
           folder.file(`${sanitizeFileName(candidateName)}.pdf`, pdfBlob);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+          console.error(`PDF failed for ${candidateName}:`, err);
+        }
+
         document.body.removeChild(container);
         processed++;
-        const percent = Math.round((processed/total)*100);
-        progressBar.style.width = percent+'%'; progressBar.innerText = percent+'%';
+        const percent = Math.round((processed / total) * 100);
+        progressBar.style.width = percent + '%';
+        progressBar.innerText = percent + '%';
         if (processed % 3 === 0) await new Promise(resolve => setTimeout(resolve, 10));
       }
       await new Promise(resolve => setTimeout(resolve, 20));
     }
-    const zipBlob = await zip.generateAsync({ type:'blob' });
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
     saveAs(zipBlob, `PDF_Testimonials_${settings.schoolName.replace(/\s/g,'_')}_${Date.now()}.zip`);
+
     pdfBtn.disabled = false; wordBtn.disabled = false;
     pdfBtn.innerHTML = '📦 BULK PDFs (ZIP)';
     progressContainer.style.display = 'none';
   }
 
-  // -------------------- FAST WORD GENERATION – SINGLE DOCUMENT --------------------
+  // ==================== FAST WORD GENERATION – SINGLE DOCUMENT ====================
   async function generateTestimonialWordSingle() {
     if (!lastLoadedRows || lastLoadedRows.length === 0) {
       alert('Please generate the report first');
       return;
     }
+
     const wordBtn = document.getElementById('generateWordBtn');
     const pdfBtn = document.getElementById('generatePdfBtn');
     wordBtn.disabled = true; pdfBtn.disabled = true;
     wordBtn.innerHTML = '<span class="spinner"></span> GENERATING WORD...';
+
     const progressContainer = document.getElementById('wordProgressContainer');
     const progressBar = document.getElementById('wordProgressBar');
     progressContainer.style.display = 'block';
     progressBar.style.width = '0%'; progressBar.innerText = '0%';
 
-    const settings = { /* same as above */ };
+    const settings = {
+      schoolName: document.getElementById('testSchoolName').value || 'RUBONGI ARMY SECONDARY SCHOOL',
+      address: document.getElementById('schoolAddress').value || 'P.O.BOX 698 TORORO',
+      tel1: document.getElementById('tel1').value || '0782651148',
+      tel2: document.getElementById('tel2').value || '0788222315',
+      website: document.getElementById('website').value || 'www.rubongiarmy.sc.ug',
+      vision: document.getElementById('vision').value || 'To produce a morally upright and self reliant future generation.',
+      mission: document.getElementById('mission').value || 'To provide affordable quality education to our community',
+      motto: document.getElementById('motto').value || 'Discipline, Excellence, Service',
+      htName: document.getElementById('htName').value || 'ZAINA .K. NALUKENGE',
+      htTitle: document.getElementById('htTitle').value || 'Maj.',
+      htRank: document.getElementById('htRank').value || 'HEAD TEACHER'
+    };
+
     const currentDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' });
 
     const { Document, Packer, Paragraph, Table, TableRow, TableCell, Border, WidthType, AlignmentType, PageBreak } = docx;
     const BorderStyle = docx.BorderStyle;
-    const allBorders = { top:{style:BorderStyle.SINGLE, size:1, color:'000000'}, bottom:{style:BorderStyle.SINGLE, size:1, color:'000000'}, left:{style:BorderStyle.SINGLE, size:1, color:'000000'}, right:{style:BorderStyle.SINGLE, size:1, color:'000000'} };
+    const allBorders = {
+      top: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      left: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      right: { style: BorderStyle.SINGLE, size: 1, color: '000000' }
+    };
 
     const children = [];
     const total = lastLoadedRows.length;
@@ -1007,22 +1246,33 @@
       );
 
       const tableRows = [
-        new TableRow({ children: [
-          new TableCell({ children: [new Paragraph('S/NO')], borders: allBorders }),
-          new TableCell({ children: [new Paragraph('SUBJECT')], borders: allBorders }),
-          new TableCell({ children: [new Paragraph('SUBJECT ACHIEVEMENT')], borders: allBorders })
-        ]})
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph('S/NO')], borders: allBorders }),
+            new TableCell({ children: [new Paragraph('SUBJECT')], borders: allBorders }),
+            new TableCell({ children: [new Paragraph('SUBJECT ACHIEVEMENT')], borders: allBorders })
+          ]
+        })
       ];
+
       subjectsList.forEach(([sub, grade], idx) => {
-        tableRows.push(new TableRow({ children: [
-          new TableCell({ children: [new Paragraph((idx+1).toString())], borders: allBorders }),
-          new TableCell({ children: [new Paragraph(sub)], borders: allBorders }),
-          new TableCell({ children: [new Paragraph({ text: grade, bold: true })], borders: allBorders })
-        ]}));
+        tableRows.push(new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph((idx+1).toString())], borders: allBorders }),
+            new TableCell({ children: [new Paragraph(sub)], borders: allBorders }),
+            new TableCell({ children: [new Paragraph({ text: grade, bold: true })], borders: allBorders })
+          ]
+        }));
       });
+
       if (subjectsList.length === 0) {
-        tableRows.push(new TableRow({ children: [ new TableCell({ children: [new Paragraph('No subjects recorded')], columnSpan: 3, borders: allBorders }) ] }));
+        tableRows.push(new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph('No subjects recorded')], columnSpan: 3, borders: allBorders })
+          ]
+        }));
       }
+
       children.push(
         new Table({ rows: tableRows, width: { size: 100, type: WidthType.PERCENTAGE } }),
         new Paragraph(''),
@@ -1035,8 +1285,9 @@
 
       if (i < total - 1) children.push(new Paragraph({ children: [new PageBreak()] }));
 
-      const percent = Math.round(((i+1)/total)*100);
-      progressBar.style.width = percent+'%'; progressBar.innerText = percent+'%';
+      const percent = Math.round(((i+1) / total) * 100);
+      progressBar.style.width = percent + '%';
+      progressBar.innerText = percent + '%';
       if (i % 10 === 0) await new Promise(resolve => setTimeout(resolve, 5));
     }
 
@@ -1049,19 +1300,21 @@
     progressContainer.style.display = 'none';
   }
 
-  // -------------------- ANALYTICS FUNCTIONS (unchanged) --------------------
-  function buildSubjectTableHTML() { /* ... */ } // (full code in final answer)
-  function buildGenderTableHTML() { /* ... */ }
-  function buildSignatureBlock() { /* ... */ }
-  function renderReportPages() { /* ... */ }
-  function printReport() { window.print(); }
-  function downloadPDF() { /* ... */ }
-  function exportExcel() { /* ... */ }
+  // ==================== HELPER FUNCTIONS ====================
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
-  // helpers
-  function readFileAsDataURL(file) { /* ... */ }
-  function sanitizeFileName(name) { return name.replace(/[\\/*?:"<>|]/g, '_').trim(); }
+  function sanitizeFileName(name) {
+    return name.replace(/[\\/*?:"<>|]/g, '_').trim();
+  }
 
+  // ==================== GLOBAL ACCESS ====================
   window.toggleSettings = toggleSettings;
   window.generateTestimonialPDFs = generateTestimonialPDFs;
   window.generateTestimonialWordSingle = generateTestimonialWordSingle;

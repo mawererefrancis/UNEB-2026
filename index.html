@@ -257,8 +257,11 @@
       background: #0a463a;
     }
 
-    /* ----- PRINT-ONLY TESTIMONIAL CONTAINER ----- */
+    /* ----- PRINT CONTAINERS ----- */
     .print-testimonial {
+      display: none;
+    }
+    .print-analytics {
       display: none;
     }
     @media print {
@@ -268,6 +271,15 @@
         top: 0;
         left: 0;
         width: 100%;
+      }
+      .print-analytics {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
       }
     }
 
@@ -640,8 +652,9 @@
     </div>
   </div>
 
-  <!-- HIDDEN PRINT CONTAINER -->
+  <!-- HIDDEN PRINT CONTAINERS -->
   <div id="printContainer" class="print-testimonial"></div>
+  <div id="printAnalyticsContainer" class="print-analytics"></div>
 
   <!-- REPORT AREA – ANALYTICS TABLES (FULLY RESTORED) -->
   <div id="reportArea"></div>
@@ -742,7 +755,7 @@
     reader.readAsArrayBuffer(file);
   }
 
-  // ==================== BUILD SUBJECT TABLE (FULLY RESTORED) ====================
+  // ==================== BUILD SUBJECT TABLE ====================
   function buildSubjectTableHTML() {
     let totals = { A:0, B:0, C:0, D:0, E:0 };
     let html = `<h3 style="color:#0a2c4e; border-left:6px solid #2563eb; padding-left:12px; margin-bottom:6px;">📋 TABLE 1: SUBJECT PERFORMANCE SUMMARY</h3>`;
@@ -809,7 +822,7 @@
     return html;
   }
 
-  // ==================== BUILD GENDER TABLE (FULLY RESTORED) ====================
+  // ==================== BUILD GENDER TABLE ====================
   function buildGenderTableHTML() {
     let grand = { MA:0, MB:0, MC:0, MD:0, ME:0, FA:0, FB:0, FC:0, FD:0, FE:0 };
 
@@ -864,8 +877,17 @@
     document.getElementById('reportArea').innerHTML = html;
   }
 
-  // ==================== PRINT / PDF / EXCEL (unchanged) ====================
-  function printReport() { window.print(); }
+  // ==================== FIXED PRINT REPORT – ONLY ANALYTICS TABLES ====================
+  function printReport() {
+    const headerHTML = document.getElementById('schoolHeaderContainer').outerHTML;
+    const reportHTML = document.getElementById('reportArea').innerHTML;
+    const container = document.getElementById('printAnalyticsContainer');
+    container.innerHTML = `<div style="padding:20px; background:white;">${headerHTML}${reportHTML}</div>`;
+    window.print();
+    container.innerHTML = ''; // clean up
+  }
+
+  // ==================== PDF / EXCEL (unchanged) ====================
   function downloadPDF() {
     const element = document.getElementById('reportArea');
     element.classList.add('pdf-export-mode');

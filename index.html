@@ -262,7 +262,7 @@
       display: none;
     }
 
-    /* ----- ANALYTICS TABLES – FULLY RESTORED ----- */
+    /* ----- ANALYTICS TABLES – FULLY RESTORED WITH PERCENTAGES ----- */
     .print-page {
       background: white;
       padding: 20px 22px;
@@ -513,7 +513,6 @@
 
     /* ========== PRINT STYLES – ANALYTICS TABLES ONLY, TWO PAGES ========== */
     @media print {
-      /* Hide everything except school header and report area */
       body * {
         visibility: hidden;
       }
@@ -531,16 +530,13 @@
         width: 100%;
         background: white;
       }
-      /* Hide testimonial print container */
       .print-testimonial {
         display: none !important;
       }
-      /* A4 landscape with generous margins */
       @page {
         size: A4 landscape;
         margin: 12mm 12mm 10mm 12mm;
       }
-      /* Each .print-page forces a new page */
       .print-page {
         page-break-after: always;
         box-shadow: none;
@@ -702,7 +698,7 @@
   <!-- HIDDEN PRINT CONTAINER (for individual testimonial prints) -->
   <div id="printContainer" class="print-testimonial"></div>
 
-  <!-- REPORT AREA – ANALYTICS TABLES (FULLY RESTORED) -->
+  <!-- REPORT AREA – ANALYTICS TABLES (WITH PERCENTAGES) -->
   <div id="reportArea"></div>
 </div>
 
@@ -794,9 +790,10 @@
     reader.readAsArrayBuffer(file);
   }
 
-  // ==================== BUILD SUBJECT TABLE ====================
+  // ==================== BUILD SUBJECT TABLE (WITH PERCENTAGES IN TOTAL ROW) ====================
   function buildSubjectTableHTML() {
     let totals = { A:0, B:0, C:0, D:0, E:0 };
+    let totalSatOverall = 0;
     let html = `<h3 style="color:#0a2c4e; border-left:6px solid #2563eb; padding-left:12px; margin-bottom:6px;">📋 TABLE 1: SUBJECT PERFORMANCE SUMMARY</h3>`;
     html += `<table>
       <thead>
@@ -814,6 +811,7 @@
     sorted.forEach((s, i) => {
       let x = subjects[s];
       totals.A += x.A; totals.B += x.B; totals.C += x.C; totals.D += x.D; totals.E += x.E;
+      totalSatOverall += x.sat;
       let p = (grade) => x.sat ? ((x[grade] / x.sat) * 100).toFixed(1) : '0.0';
 
       html += `<tr>
@@ -829,6 +827,7 @@
       </tr>`;
     });
 
+    // PROJECT WORK ROW – using global projectTotals (accurate)
     html += `<tr class="project-row" style="background: #e3effa; font-weight: 600;">
       <td></td><td>📌 PROJECT WORK</td><td></td>
       <td>${projectTotals.PA}</td><td></td><td>${projectTotals.PB}</td><td></td>
@@ -836,17 +835,26 @@
       <td>${projectTotals.PE}</td><td></td><td>${projectTotals.PX}</td>
     </tr>`;
 
+    // TOTAL ROW – now includes percentages
     html += `<tfoot>
       <tr>
         <td></td><td><strong>TOTAL (A–E)</strong></td><td></td>
-        <td>${totals.A}</td><td></td><td>${totals.B}</td><td></td>
-        <td>${totals.C}</td><td></td><td>${totals.D}</td><td></td>
-        <td>${totals.E}</td><td></td><td></td>
+        <td>${totals.A}</td>
+        <td>${totalSatOverall ? ((totals.A / totalSatOverall) * 100).toFixed(1) : '0.0'}%</td>
+        <td>${totals.B}</td>
+        <td>${totalSatOverall ? ((totals.B / totalSatOverall) * 100).toFixed(1) : '0.0'}%</td>
+        <td>${totals.C}</td>
+        <td>${totalSatOverall ? ((totals.C / totalSatOverall) * 100).toFixed(1) : '0.0'}%</td>
+        <td>${totals.D}</td>
+        <td>${totalSatOverall ? ((totals.D / totalSatOverall) * 100).toFixed(1) : '0.0'}%</td>
+        <td>${totals.E}</td>
+        <td>${totalSatOverall ? ((totals.E / totalSatOverall) * 100).toFixed(1) : '0.0'}%</td>
+        <td></td>
       </tr>
     </tfoot></table>`;
 
-    let totalA = 0, totalSat = 0;
-    Object.values(subjects).forEach(x => { totalA += x.A; totalSat += x.sat; });
+    // ANALYTICS CARDS
+    let totalA = totals.A, totalSat = totalSatOverall;
     let mean = totalSat ? (totalA / totalSat * 100) : 0;
     let comment = mean >= 40 ? '🏆 Excellent Performance' : (mean >= 25 ? '📈 Good Performance' : '📉 Needs Improvement');
 
@@ -858,7 +866,7 @@
     return html;
   }
 
-  // ==================== BUILD GENDER TABLE ====================
+  // ==================== BUILD GENDER TABLE – CORRECTED PERCENTAGES ====================
   function buildGenderTableHTML() {
     let grand = { MA:0, MB:0, MC:0, MD:0, ME:0, FA:0, FB:0, FC:0, FD:0, FE:0 };
 
@@ -882,14 +890,41 @@
       </tr>`;
     });
 
+    // Compute totals for each gender
+    let totalMale = grand.MA + grand.MB + grand.MC + grand.MD + grand.ME;
+    let totalFemale = grand.FA + grand.FB + grand.FC + grand.FD + grand.FE;
+
+    // TOTAL ROW (counts)
     html += `<tfoot>
-      <tr>
+      <tr style="background: #eef4ff;">
         <td><strong>TOTAL</strong></td>
         <td>${grand.MA}</td><td>${grand.MB}</td><td>${grand.MC}</td><td>${grand.MD}</td><td>${grand.ME}</td>
         <td>${grand.FA}</td><td>${grand.FB}</td><td>${grand.FC}</td><td>${grand.FD}</td><td>${grand.FE}</td>
-      </tr>
-    </tfoot></table>`;
+      </tr>`;
 
+    // MALE PERCENTAGE ROW (sums to 100% of male subject entries)
+    html += `<tr style="background: #f0f5fa; font-weight:600;">
+      <td><strong>Male %</strong></td>
+      <td>${totalMale ? ((grand.MA / totalMale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalMale ? ((grand.MB / totalMale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalMale ? ((grand.MC / totalMale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalMale ? ((grand.MD / totalMale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalMale ? ((grand.ME / totalMale) * 100).toFixed(1) : '0.0'}%</td>
+      <td colspan="5"></td> <!-- empty cells for female columns -->
+    </tr>`;
+
+    // FEMALE PERCENTAGE ROW (sums to 100% of female subject entries)
+    html += `<tr style="background: #f0f5fa; font-weight:600;">
+      <td><strong>Female %</strong></td>
+      <td colspan="5"></td> <!-- empty cells for male columns -->
+      <td>${totalFemale ? ((grand.FA / totalFemale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalFemale ? ((grand.FB / totalFemale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalFemale ? ((grand.FC / totalFemale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalFemale ? ((grand.FD / totalFemale) * 100).toFixed(1) : '0.0'}%</td>
+      <td>${totalFemale ? ((grand.FE / totalFemale) * 100).toFixed(1) : '0.0'}%</td>
+    </tr>`;
+
+    html += `</tfoot></table>`;
     return html;
   }
 

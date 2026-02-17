@@ -300,8 +300,8 @@
       color: #0a2c4e;
       border: 1px solid white;
     }
-    /* Section title style (like stream title) */
-    .section-title {
+    /* Section title style (like stream title) – ensure background prints */
+    .section-title, .stream-title {
       background: #2563eb; 
       color: white; 
       padding: 5px 12px; 
@@ -309,15 +309,8 @@
       margin: 0; 
       font-size: 1.1rem;
       display: inline-block;
-    }
-    .stream-title {
-      background: #2563eb; 
-      color: white; 
-      padding: 5px 12px; 
-      border-radius: 30px 30px 0 0; 
-      margin: 0; 
-      font-size: 1.1rem;
-      display: inline-block;
+      -webkit-print-color-adjust: exact;  /* force background print */
+      print-color-adjust: exact;
     }
 
     /* print landscape – perfectly fitted, high res */
@@ -352,6 +345,11 @@
       .grade-D { background-color: #ffe0b2 !important; }
       .grade-E { background-color: #f9d6d6 !important; }
       .grade-X { background-color: #e0e0e0 !important; }
+      /* Ensure section titles print with background */
+      .section-title, .stream-title {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
     }
   </style>
 </head>
@@ -426,7 +424,7 @@
   let lastLoadedRows = null;
   let streamData = {}; // per stream subject aggregates
   let streamProjectTotals = {}; // per stream project work aggregates
-  let studentRankings = []; // for top 20
+  let studentRankings = []; // for top 20 and bottom 20
 
   // Core subjects for tie-breaking (ordered by importance)
   const CORE_SUBJECTS = ['ENG', 'MTC', 'BIO', 'CHEM', 'PHY', 'GEO', 'HIS'];
@@ -560,7 +558,7 @@
           }
         });
 
-        // Sort student rankings by new criteria
+        // Sort student rankings by criteria (descending for best)
         studentRankings.sort((a, b) => {
           if (a.gradeCounts.A !== b.gradeCounts.A) return b.gradeCounts.A - a.gradeCounts.A;
           if (a.gradeCounts.B !== b.gradeCounts.B) return b.gradeCounts.B - a.gradeCounts.B;
@@ -819,7 +817,7 @@
         <td class="grade-cell grade-D">${counts.D}</td>
         <td class="grade-cell grade-E">${counts.E}</td>
         <td class="grade-cell grade-X">${counts.X}</td>
-        <td style="text-align:left; font-size:11.5px;">${student.subjects}</td>  <!-- Increased to 11.5px -->
+        <td style="text-align:left; font-size:11.5px;">${student.subjects}</td>
       </tr>`;
     });
 
@@ -829,6 +827,70 @@
     if (top20.length > 0) {
       let top = top20[0];
       html += `<div class="summary-cards"><div class="card">🥇 Top Student: ${top.name} (${top.indexNo}) · A:${top.gradeCounts.A} B:${top.gradeCounts.B} C:${top.gradeCounts.C}</div></div>`;
+    }
+
+    return html;
+  }
+
+  // ========== BOTTOM 20 STUDENTS RANKING TABLE (worst performers) ==========
+  function buildBottom20TableHTML() {
+    if (studentRankings.length === 0) return '';
+
+    // Create a reversed copy (ascending order by same criteria)
+    const bottom20 = [...studentRankings].sort((a, b) => {
+      if (a.gradeCounts.A !== b.gradeCounts.A) return a.gradeCounts.A - b.gradeCounts.A;
+      if (a.gradeCounts.B !== b.gradeCounts.B) return a.gradeCounts.B - b.gradeCounts.B;
+      if (a.gradeCounts.C !== b.gradeCounts.C) return a.gradeCounts.C - b.gradeCounts.C;
+      if (a.gradeCounts.D !== b.gradeCounts.D) return a.gradeCounts.D - b.gradeCounts.D;
+      
+      for (let subj of CORE_SUBJECTS) {
+        let gradeA = a.coreGrades[subj] || 'X';
+        let gradeB = b.coreGrades[subj] || 'X';
+        let valA = { A:5, B:4, C:3, D:2, E:1, X:0 }[gradeA];
+        let valB = { A:5, B:4, C:3, D:2, E:1, X:0 }[gradeB];
+        if (valA !== valB) return valA - valB; // ascending
+      }
+      return a.totalPoints - b.totalPoints;
+    }).slice(0, 20);
+
+    let html = `<h3 class="section-title">📉 BOTTOM 20 STUDENTS (NEED IMPROVEMENT)</h3>`;
+    html += `<table>
+      <thead>
+        <tr>
+          <th>S/No</th><th>Position</th><th>Index No</th><th>Name</th><th>Sex</th>
+          <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>X</th>
+          <th>Subjects & Grades</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    bottom20.forEach((student, idx) => {
+      let position = idx + 1;
+      let posText = position + (position === 1 ? 'st' : position === 2 ? 'nd' : position === 3 ? 'rd' : 'th');
+      let counts = student.gradeCounts;
+      
+      html += `<tr>
+        <td>${idx + 1}</td>
+        <td><strong>${posText}</strong></td>
+        <td>${student.indexNo}</td>
+        <td style="text-align:left;">${student.name}</td>
+        <td>${student.sex}</td>
+        <td class="grade-cell grade-A">${counts.A}</td>
+        <td class="grade-cell grade-B">${counts.B}</td>
+        <td class="grade-cell grade-C">${counts.C}</td>
+        <td class="grade-cell grade-D">${counts.D}</td>
+        <td class="grade-cell grade-E">${counts.E}</td>
+        <td class="grade-cell grade-X">${counts.X}</td>
+        <td style="text-align:left; font-size:11.5px;">${student.subjects}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table>`;
+
+    // Bottom performer card
+    if (bottom20.length > 0) {
+      let bottom = bottom20[0];
+      html += `<div class="summary-cards"><div class="card">⚠️ Needs Most Support: ${bottom.name} (${bottom.indexNo}) · A:${bottom.gradeCounts.A} B:${bottom.gradeCounts.B}</div></div>`;
     }
 
     return html;
@@ -852,6 +914,11 @@
     // top 20 students table
     if (studentRankings.length > 0) {
       html += `<div class="print-page">${buildTop20TableHTML()}${buildSignatureBlock()}</div>`;
+    }
+
+    // bottom 20 students table
+    if (studentRankings.length > 0) {
+      html += `<div class="print-page">${buildBottom20TableHTML()}${buildSignatureBlock()}</div>`;
     }
 
     document.getElementById('reportArea').innerHTML = html;
@@ -946,6 +1013,7 @@
         }
         else if (text.includes('BEST STREAM')) sheetName = 'Best Stream';
         else if (text.includes('TOP 20 STUDENTS')) sheetName = 'Top 20 Students';
+        else if (text.includes('BOTTOM 20 STUDENTS')) sheetName = 'Bottom 20 Students';
         else sheetName = text.substring(0,20).replace(/[^\w]/g,'_');
       }
       const tbl = page.querySelector('table');
